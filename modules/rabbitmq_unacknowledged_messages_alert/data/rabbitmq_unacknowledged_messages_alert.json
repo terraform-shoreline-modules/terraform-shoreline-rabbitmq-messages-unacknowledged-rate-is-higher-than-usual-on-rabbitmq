@@ -1,0 +1,198 @@
+{
+  "name": "rabbitmq_unacknowledged_messages_alert",
+  "description": "This incident type occurs when the ratio of unacknowledged to acknowledged messages in a RabbitMQ queue is higher than usual. This may indicate a problem in the message pipeline and requires investigation to ensure that messages are being processed properly. It is often accompanied by a query alert monitor triggered by a specific metric threshold.",
+  "params": [
+    {
+      "name": "TOTAL_MEMORY_IN_KB",
+      "value": ""
+    },
+    {
+      "name": "RABBITMQ_PASSWORD",
+      "value": ""
+    },
+    {
+      "name": "QUEUE_NAME",
+      "value": ""
+    },
+    {
+      "name": "RABBITMQ_MEMORY_IN_KB",
+      "value": ""
+    },
+    {
+      "name": "NEW_MEMORY_IN_KB",
+      "value": ""
+    },
+    {
+      "name": "RABBITMQ_HOSTNAME",
+      "value": ""
+    },
+    {
+      "name": "RABBITMQ_USERNAME",
+      "value": ""
+    },
+    {
+      "name": "HOST_NAME",
+      "value": ""
+    },
+    {
+      "name": "K8S_CLUSTER_NAME",
+      "value": ""
+    },
+    {
+      "name": "NAMESPACE",
+      "value": ""
+    }
+  ],
+  "cells": [
+    {
+      "name": "cell_1",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## RabbitMQ Unacknowledged Messages Alert\nThis incident type occurs when the ratio of unacknowledged to acknowledged messages in a RabbitMQ queue is higher than usual. This may indicate a problem in the message pipeline and requires investigation to ensure that messages are being processed properly. It is often accompanied by a query alert monitor triggered by a specific metric threshold."
+    },
+    {
+      "name": "cell_2",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## 1. Check RabbitMQ status"
+    },
+    {
+      "name": "cell_3",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `systemctl status rabbitmq-server`"
+    },
+    {
+      "name": "cell_4",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## 2. Check RabbitMQ logs for errors"
+    },
+    {
+      "name": "cell_5",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `journalctl -u rabbitmq-server -f`"
+    },
+    {
+      "name": "cell_6",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## 3. Check RabbitMQ queue metrics"
+    },
+    {
+      "name": "cell_7",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `rabbitmqctl list_queues name messages_ready messages_unacknowledged`"
+    },
+    {
+      "name": "cell_8",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## 4. Check for network issues or latency"
+    },
+    {
+      "name": "cell_9",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `ping ${RABBITMQ_HOSTNAME}`"
+    },
+    {
+      "name": "cell_10",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## 5. Check for disk space issues on RabbitMQ server"
+    },
+    {
+      "name": "cell_11",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `df -h`"
+    },
+    {
+      "name": "cell_12",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## 6. Check for CPU and memory usage on RabbitMQ server"
+    },
+    {
+      "name": "cell_13",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `top`"
+    },
+    {
+      "name": "cell_14",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## 7. Check for any process that may be blocking RabbitMQ"
+    },
+    {
+      "name": "cell_15",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `sudo netstat -ltnp | grep 5672`"
+    },
+    {
+      "name": "cell_16",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## 8. Check for any RabbitMQ plugins that may be causing issues"
+    },
+    {
+      "name": "cell_17",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `rabbitmq-plugins list`"
+    },
+    {
+      "name": "cell_18",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## 9. Check RabbitMQ configuration files for errors"
+    },
+    {
+      "name": "cell_19",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `sudo rabbitmqctl eval 'application:ensure_all_started(rabbit).' && sudo rabbitmqctl eval 'rabbit_config_checks:run().'`"
+    },
+    {
+      "name": "cell_20",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## 10. Check for any network configurations that may be causing issues"
+    },
+    {
+      "name": "cell_21",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `sudo rabbitmqctl report | grep listeners`"
+    },
+    {
+      "name": "cell_22",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Increase the resources allocated to RabbitMQ, such as increasing server memory or CPU, to improve its processing capacity."
+    },
+    {
+      "name": "cell_23",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "host | host_name=$HOST_NAME | invoke_update_memory_allocation($TOTAL_MEMORY_IN_KB, $RABBITMQ_MEMORY_IN_KB, $NEW_MEMORY_IN_KB)"
+    },
+    {
+      "name": "cell_24",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the RabbitMQ configuration settings to ensure that the message queue is properly configured and optimized for the volume of messages being processed."
+    },
+    {
+      "name": "cell_25",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "host | host_name=$HOST_NAME | invoke_rabbitmq_config_check($RABBITMQ_PASSWORD, $QUEUE_NAME, $RABBITMQ_USERNAME)"
+    }
+  ]
+}
